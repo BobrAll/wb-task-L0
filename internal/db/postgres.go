@@ -101,7 +101,7 @@ func GetOrders(orderUID string) (models.Order, error) {
 	var order models.Order
 	err = db.Get(&order, orderQuery, orderUID)
 	if err != nil {
-		log.Fatal("failed to select order:", err)
+		return models.Order{}, err
 	}
 
 	var items []models.Item
