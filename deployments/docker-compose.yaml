@@ -1,0 +1,18 @@
+services:
+  database:
+    container_name: wb-task-1-db
+    image: postgres:15
+    env_file: "../configs/.env"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  kafka:
+    container_name: wb-task-1-kafka
+    image: apache/kafka-native:3.9.0
+    env_file: "../configs/.env"
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./kafka-logs:/var/lib/kafka/data

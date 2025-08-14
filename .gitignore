@@ -1,3 +1,5 @@
 /.idea
 /.vscode
-/deployments
+/deployments/kafka-logs
+/deployments/postgres-data
+
