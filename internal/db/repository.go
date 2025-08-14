@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -14,7 +15,23 @@ import (
 	"wb-task-L0/internal/models"
 )
 
-func init() {
+type OrderRepository struct {
+	Db *sqlx.DB
+}
+
+func InitConn() *sqlx.DB {
+	db, err := sqlx.Connect("postgres", getDBConnStr())
+	if err != nil {
+		log.Fatal("cannot connect to db: %w", err)
+	}
+	return db
+}
+
+func NewOrderRepository(db *sqlx.DB) *OrderRepository {
+	return &OrderRepository{Db: db}
+}
+
+func loadEnv() {
 	_, currFile, _, _ := runtime.Caller(0)
 	currDir := filepath.Dir(currFile)
 	envPath := filepath.Join(currDir, "..", "..", "configs", ".env")
@@ -24,6 +41,7 @@ func init() {
 }
 
 func getDBConnStr() string {
+	loadEnv()
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
@@ -35,25 +53,26 @@ func getDBConnStr() string {
 }
 
 func RunMigrations() {
-	m, err := migrate.New(
-		"file://migrations",
-		getDBConnStr(),
-	)
+	m, err := migrate.New("file://migrations", getDBConnStr())
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatal(err)
 	}
 }
 
-func GetOrders(orderUID string) (models.Order, error) {
-	db, err := sqlx.Connect("postgres", getDBConnStr())
+func (r *OrderRepository) GetAllOrdersIDs() ([]string, error) {
+	query := `SELECT o.order_uid FROM orders o`
+	var ids []string
+	err := r.Db.Select(&ids, query)
 	if err != nil {
-		log.Fatal("cannot connect to db:", err)
+		return nil, fmt.Errorf("failed to get orders ids")
 	}
-	defer db.Close()
+	return ids, nil
+}
 
+func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
 	orderQuery := `
 		SELECT
 			o.order_uid,
@@ -99,14 +118,14 @@ func GetOrders(orderUID string) (models.Order, error) {
 		WHERE order_id = $1
 `
 	var order models.Order
-	err = db.Get(&order, orderQuery, orderUID)
+	err := r.Db.Get(&order, orderQuery, orderUID)
 	if err != nil {
 		return models.Order{}, err
 	}
 
 	var items []models.Item
 
-	err = db.Select(&items, itemsQuery, orderUID)
+	err = r.Db.Select(&items, itemsQuery, orderUID)
 	if err != nil {
 		return models.Order{}, err
 	}
