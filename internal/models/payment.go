@@ -1,5 +1,7 @@
 package models
 
+import "wb-task-L0/internal/transport/dto"
+
 type Payment struct {
 	Transaction  string  `json:"transaction" db:"transaction"`
 	RequestID    string  `json:"request_id" db:"request_id"`
@@ -11,4 +13,17 @@ type Payment struct {
 	DeliveryCost float64 `json:"delivery_cost" db:"delivery_cost"`
 	GoodsTotal   int32   `json:"goods_total" db:"goods_total"`
 	CustomFee    float64 `json:"custom_fee" db:"custom_fee"`
+}
+
+func (payment Payment) ToDto() dto.PaymentDto {
+	return dto.PaymentDto{
+		Currency:     payment.Currency,
+		Provider:     payment.Provider,
+		Amount:       payment.Amount,
+		PaymentDt:    payment.PaymentDt,
+		Bank:         payment.Bank,
+		DeliveryCost: payment.DeliveryCost,
+		GoodsTotal:   payment.GoodsTotal,
+		CustomFee:    payment.CustomFee,
+	}
 }

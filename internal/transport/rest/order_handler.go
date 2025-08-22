@@ -9,19 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterHandlers(repo *db.OrderRepository) {
-	r := gin.Default()
-
-	api := r.Group("/api/v1")
-	{
-		api.GET("/orders", getAllOrdersIDs(repo))
-		api.GET("/orders/:order_id", getOrder(repo))
-	}
-
-	r.Run(":8080")
-}
-
-func getAllOrdersIDs(repo *db.OrderRepository) gin.HandlerFunc {
+func GetAllOrdersIDs(repo *db.OrderRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		result, err := repo.GetAllOrdersIDs()
 		if err != nil {
@@ -32,7 +20,7 @@ func getAllOrdersIDs(repo *db.OrderRepository) gin.HandlerFunc {
 	}
 }
 
-func getOrder(repo *db.OrderRepository) gin.HandlerFunc {
+func GetOrder(repo *db.OrderRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		orderID := c.Param("order_id")
 		result, err := repo.GetOrder(orderID)
@@ -47,6 +35,6 @@ func getOrder(repo *db.OrderRepository) gin.HandlerFunc {
 			}
 			return
 		}
-		c.JSON(http.StatusOK, result)
+		c.JSON(http.StatusOK, result.ToDto())
 	}
 }

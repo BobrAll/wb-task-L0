@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"time"
+	"wb-task-L0/internal/transport/dto"
+)
 
 type Order struct {
 	OrderID           string    `json:"order_uid" db:"order_uid"`
@@ -17,4 +20,22 @@ type Order struct {
 	SmID              int32     `json:"sm_id" db:"sm_id"`
 	DateCreated       time.Time `json:"date_created" db:"date_created"`
 	OofShard          int32     `json:"oof_shard" db:"oof_shard"`
+}
+
+func (order *Order) ToDto() dto.OrderDto {
+	itemsDto := make([]dto.ItemDto, len(order.Items))
+	for i, item := range order.Items {
+		itemsDto[i] = item.ToDto()
+	}
+
+	return dto.OrderDto{
+		OrderID:         order.OrderID,
+		TrackNumber:     order.TrackNumber,
+		Entry:           order.Entry,
+		Delivery:        order.Delivery.ToDto(),
+		Payment:         order.Payment.ToDto(),
+		Items:           itemsDto,
+		DeliveryService: order.DeliveryService,
+		DateCreated:     order.DateCreated,
+	}
 }

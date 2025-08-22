@@ -115,7 +115,7 @@ func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
 	itemsQuery := `
 		SELECT *
 		FROM items
-		WHERE order_id = $1
+		WHERE track_number = $1
 `
 	var order models.Order
 	err := r.Db.Get(&order, orderQuery, orderUID)
@@ -125,7 +125,7 @@ func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
 
 	var items []models.Item
 
-	err = r.Db.Select(&items, itemsQuery, orderUID)
+	err = r.Db.Select(&items, itemsQuery, order.TrackNumber)
 	if err != nil {
 		return models.Order{}, err
 	}

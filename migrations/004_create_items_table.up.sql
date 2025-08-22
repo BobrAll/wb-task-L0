@@ -1,8 +1,7 @@
 CREATE TABLE items
 (
     chrt_id      BIGINT PRIMARY KEY,
-    order_id     TEXT    NOT NULL REFERENCES orders (order_uid),
-    track_number TEXT    NOT NULL,
+    track_number TEXT    NOT NULL REFERENCES orders (track_number),
     price        NUMERIC NOT NULL,
     rid          TEXT    NOT NULL,
     name         TEXT    NOT NULL,
@@ -13,4 +12,3 @@ CREATE TABLE items
     brand        TEXT    NOT NULL,
     status       INT     NOT NULL
 );
-
