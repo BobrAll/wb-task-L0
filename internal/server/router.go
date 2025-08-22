@@ -15,6 +15,7 @@ func StartServer(repo *db.OrderRepository) {
 		api.GET("/orders/:order_id", rest.GetOrder(repo))
 	}
 
+	r.Static("/static", "./web")
 	r.NoRoute(func(c *gin.Context) {
 		c.File("web/index.html")
 	})

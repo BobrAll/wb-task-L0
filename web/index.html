@@ -1,6 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр заказов</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
 <body>
-<h1>Hi!</h1>
+<div class="container">
+    <h1>Список заказов</h1>
+
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Поиск заказа...">
+        <button id="search-button">Найти</button>
+        <button id="clear-search">Очистить</button>
+    </div>
+
+    <div id="search-info"></div>
+    <div id="orders-container"></div>
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<div class="modal" id="order-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="order-details"></div>
+    </div>
+</div>
+
+<div class="notification" id="notification">Скопировано!</div>
+
+<script src="/static/script.js"></script>
 </body>
 </html>

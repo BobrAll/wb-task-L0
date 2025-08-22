@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"wb-task-L0/internal/models"
 )
 
@@ -62,14 +63,44 @@ func RunMigrations() {
 	}
 }
 
-func (r *OrderRepository) GetAllOrdersIDs() ([]string, error) {
-	query := `SELECT o.order_uid FROM orders o`
-	var ids []string
-	err := r.Db.Select(&ids, query)
+func (r *OrderRepository) GetOrdersIDs(search string, page int32, size int32) ([]string, int32, error) {
+	query := `
+        SELECT 
+            ARRAY_AGG(order_uid) as ids,
+            COUNT(*) as total_count
+        FROM (
+            SELECT order_uid 
+            FROM orders 
+            WHERE order_uid LIKE $1 
+            ORDER BY order_uid 
+            OFFSET $2 LIMIT $3
+        ) AS subquery
+    `
+
+	searchPattern := "%" + search + "%"
+	offset := page * size
+
+	var idsBytes []byte
+	var count int32
+
+	err := r.Db.QueryRow(query, searchPattern, offset, size).Scan(&idsBytes, &count)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get orders ids")
+		return nil, 0, fmt.Errorf("failed to get orders: %w", err)
 	}
-	return ids, nil
+
+	ids := parsePostgresArr(idsBytes)
+	return ids, count, nil
+}
+
+func parsePostgresArr(arrayBytes []byte) []string {
+	idsStr := string(arrayBytes)
+	idsStr = strings.Trim(idsStr, "{}")
+	ids := strings.Split(idsStr, ",")
+
+	if len(ids) == 1 && ids[0] == "" {
+		ids = []string{}
+	}
+	return ids
 }
 
 func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
