@@ -5,7 +5,7 @@ type ItemDto struct {
 	Price       float64 `json:"price" db:"price"`
 	Name        string  `json:"name" db:"name"`
 	Sale        float32 `json:"sale" db:"sale"`
-	Size        int32   `json:"size" db:"size"`
+	Size        string  `json:"size" db:"size"`
 	TotalPrice  float64 `json:"total_price" db:"total_price"`
 	Brand       string  `json:"brand" db:"brand"`
 }

@@ -19,7 +19,7 @@ type Order struct {
 	ShardKey          int32     `json:"shard_key" db:"shard_key"`
 	SmID              int32     `json:"sm_id" db:"sm_id"`
 	DateCreated       time.Time `json:"date_created" db:"date_created"`
-	OofShard          int32     `json:"oof_shard" db:"oof_shard"`
+	OofShard          string    `json:"oof_shard" db:"oof_shard"`
 }
 
 func (order *Order) ToDto() dto.OrderDto {

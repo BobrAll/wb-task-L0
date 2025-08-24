@@ -66,15 +66,17 @@ func RunMigrations() {
 func (r *OrderRepository) GetOrdersIDs(search string, page int32, size int32) ([]string, int32, error) {
 	query := `
         SELECT 
-            ARRAY_AGG(order_uid) as ids,
-            COUNT(*) as total_count
-        FROM (
-            SELECT order_uid 
-            FROM orders 
-            WHERE order_uid LIKE $1 
-            ORDER BY order_uid 
-            OFFSET $2 LIMIT $3
-        ) AS subquery
+			ARRAY_AGG(order_uid) AS ids,
+			MAX(total_count) AS total_count
+		FROM (
+			SELECT 
+				order_uid,
+				COUNT(*) OVER() AS total_count
+			FROM orders
+			WHERE order_uid LIKE $1
+			ORDER BY order_uid
+			OFFSET $2 LIMIT $3
+		) AS subquery;
     `
 
 	searchPattern := "%" + search + "%"
@@ -141,13 +143,14 @@ func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
 		JOIN deliveries d ON o.delivery_id = d.id
 		JOIN payments   p ON o.payment_transaction = p.transaction
 		WHERE o.order_uid = $1
-`
+	`
 
 	itemsQuery := `
 		SELECT *
 		FROM items
 		WHERE track_number = $1
-`
+	`
+
 	var order models.Order
 	err := r.Db.Get(&order, orderQuery, orderUID)
 	if err != nil {
@@ -163,4 +166,62 @@ func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
 	order.Items = items
 
 	return order, nil
+}
+
+func (r *OrderRepository) SaveOrder(order models.Order) error {
+	tx, err := r.Db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	var deliveryID int
+	err = tx.QueryRowx(`
+		INSERT INTO deliveries (name, phone, zip, city, address, region, email)
+		VALUES ($1,$2,$3,$4,$5,$6,$7)
+		RETURNING id
+	`,
+		order.Delivery.Name, order.Delivery.Phone, order.Delivery.Zip,
+		order.Delivery.City, order.Delivery.Address, order.Delivery.Region, order.Delivery.Email,
+	).Scan(&deliveryID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.NamedExec(`
+		INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
+		VALUES (:transaction, :request_id, :currency, :provider, :amount, :payment_dt, :bank, :delivery_cost, :goods_total, :custom_fee)
+		ON CONFLICT (transaction) DO NOTHING
+	`, order.Payment)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`
+		INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_transaction,
+		                    locale, internal_signature, customer_id, delivery_service,
+		                    shard_key, sm_id, date_created, oof_shard)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+	`,
+		order.OrderID, order.TrackNumber, order.Entry, deliveryID, order.Payment.Transaction,
+		order.Locale, order.InternalSignature, order.CustomerID, order.DeliveryService,
+		order.ShardKey, order.SmID, order.DateCreated, order.OofShard,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if len(order.Items) > 0 {
+		_, err = tx.NamedExec(`
+			INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
+			VALUES (:chrt_id, :track_number, :price, :rid, :name, :sale, :size, :total_price, :nm_id, :brand, :status)
+		`, order.Items)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
 }

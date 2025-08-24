@@ -6,7 +6,7 @@ CREATE TABLE items
     rid          TEXT    NOT NULL,
     name         TEXT    NOT NULL,
     sale         REAL    NOT NULL,
-    size         INT     NOT NULL,
+    size         TEXT    NOT NULL,
     total_price  NUMERIC NOT NULL,
     nm_id        BIGINT  NOT NULL,
     brand        TEXT    NOT NULL,
