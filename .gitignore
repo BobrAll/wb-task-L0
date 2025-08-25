@@ -2,4 +2,4 @@
 /.vscode
 /deployments/kafka-logs
 /deployments/postgres-data
-
+/configs/.env
