@@ -3,12 +3,12 @@ package rest
 import (
 	"database/sql"
 	"errors"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strconv"
+	"wb-task-L0/internal/cache"
 	"wb-task-L0/internal/db"
-
-	"github.com/gin-gonic/gin"
 )
 
 func GetAllOrdersIDs(repo *db.OrderRepository) gin.HandlerFunc {
@@ -47,10 +47,17 @@ func parseInt32(numStr string) (int32, error) {
 	return int32(num), nil
 }
 
-func GetOrder(repo *db.OrderRepository) gin.HandlerFunc {
+func GetOrder(repo *db.OrderRepository, cache cache.Cache) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		orderID := c.Param("order_id")
-		result, err := repo.GetOrder(orderID)
+
+		var err error
+		order, ok := cache.Get(orderID)
+		if !ok {
+			order, err = repo.GetOrder(orderID)
+			cache.Add(order)
+		}
+
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
@@ -62,6 +69,6 @@ func GetOrder(repo *db.OrderRepository) gin.HandlerFunc {
 			}
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"order": result.ToDto()})
+		c.JSON(http.StatusOK, gin.H{"order": order.ToDto()})
 	}
 }
