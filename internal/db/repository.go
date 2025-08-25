@@ -67,8 +67,8 @@ func RunMigrations() {
 func (r *OrderRepository) GetOrdersIDs(search string, page int32, size int32) ([]string, int32, error) {
 	query := `
         SELECT 
-			ARRAY_AGG(order_uid) AS ids,
-			MAX(total_count) AS total_count
+			COALESCE(ARRAY_AGG(order_uid), '{}') AS ids,
+			COALESCE(MAX(total_count), 0) AS total_count
 		FROM (
 			SELECT 
 				order_uid,
