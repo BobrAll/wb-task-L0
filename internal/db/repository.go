@@ -75,7 +75,7 @@ func (r *OrderRepository) GetOrdersIDs(search string, page int32, size int32) ([
 				COUNT(*) OVER() AS total_count
 			FROM orders
 			WHERE order_uid LIKE $1
-			ORDER BY order_uid
+			ORDER BY date_created
 			OFFSET $2 LIMIT $3
 		) AS subquery;
     `
