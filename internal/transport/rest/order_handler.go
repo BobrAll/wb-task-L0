@@ -11,6 +11,7 @@ import (
 	"wb-task-L0/internal/db"
 )
 
+// GetAllOrdersIDs handles HTTP request for paginated order IDs
 func GetAllOrdersIDs(repo *db.OrderRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		search := c.Query("search")
@@ -39,6 +40,7 @@ func GetAllOrdersIDs(repo *db.OrderRepository) gin.HandlerFunc {
 	}
 }
 
+// parseInt32 converts string to int32
 func parseInt32(numStr string) (int32, error) {
 	num, err1 := strconv.ParseInt(numStr, 10, 32)
 	if err1 != nil {
@@ -47,6 +49,7 @@ func parseInt32(numStr string) (int32, error) {
 	return int32(num), nil
 }
 
+// GetOrder handles HTTP request for retrieving a single order
 func GetOrder(repo *db.OrderRepository, cache cache.Cache) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		orderID := c.Param("order_id")

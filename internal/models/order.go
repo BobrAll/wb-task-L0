@@ -5,6 +5,7 @@ import (
 	"wb-task-L0/internal/transport/dto"
 )
 
+// Order represents a customer's order with delivery, payment, and items
 type Order struct {
 	OrderID           string    `json:"order_uid" db:"order_uid"`
 	TrackNumber       string    `json:"track_number" db:"track_number"`
@@ -22,6 +23,7 @@ type Order struct {
 	OofShard          string    `json:"oof_shard" db:"oof_shard"`
 }
 
+// ToDto converts Order model to DTO
 func (order *Order) ToDto() dto.OrderDto {
 	itemsDto := make([]dto.ItemDto, len(order.Items))
 	for i, item := range order.Items {

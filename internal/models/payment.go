@@ -2,6 +2,7 @@ package models
 
 import "wb-task-L0/internal/transport/dto"
 
+// Payment represents payment details for an order
 type Payment struct {
 	Transaction  string  `json:"transaction" db:"transaction"`
 	RequestID    string  `json:"request_id" db:"request_id"`
@@ -15,6 +16,7 @@ type Payment struct {
 	CustomFee    float64 `json:"custom_fee" db:"custom_fee"`
 }
 
+// ToDto converts Payment model to DTO
 func (payment Payment) ToDto() dto.PaymentDto {
 	return dto.PaymentDto{
 		Currency:     payment.Currency,

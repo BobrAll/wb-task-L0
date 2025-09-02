@@ -1,5 +1,6 @@
 package dto
 
+// DeliveryDto represents delivery information for API responses
 type DeliveryDto struct {
 	Name    string `json:"name" db:"name"`
 	Zip     string `json:"zip" db:"zip"`

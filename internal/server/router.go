@@ -7,6 +7,7 @@ import (
 	"wb-task-L0/internal/transport/rest"
 )
 
+// StartServer initializes and runs the HTTP server
 func StartServer(repo *db.OrderRepository, cache cache.Cache) {
 	r := gin.Default()
 

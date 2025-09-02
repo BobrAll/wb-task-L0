@@ -1,5 +1,6 @@
 package dto
 
+// PaymentDto represents payment details for API responses
 type PaymentDto struct {
 	Currency     string  `json:"currency" db:"currency"`
 	Provider     string  `json:"provider" db:"provider"`

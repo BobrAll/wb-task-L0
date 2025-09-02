@@ -4,6 +4,7 @@ import (
 	"wb-task-L0/internal/transport/dto"
 )
 
+// Delivery represents delivery information for an order
 type Delivery struct {
 	Name    string `json:"name" db:"name"`
 	Phone   string `json:"phone" db:"phone"`
@@ -14,6 +15,7 @@ type Delivery struct {
 	Email   string `json:"email" db:"email"`
 }
 
+// ToDto converts Delivery model to DTO
 func (delivery Delivery) ToDto() dto.DeliveryDto {
 	return dto.DeliveryDto{
 		Name:    delivery.Name,

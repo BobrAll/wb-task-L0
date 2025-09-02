@@ -2,6 +2,7 @@ package models
 
 import "wb-task-L0/internal/transport/dto"
 
+// Item represents a product in an order
 type Item struct {
 	ChrtID      int64   `json:"chrt_id" db:"chrt_id"`
 	TrackNumber string  `json:"track_number" db:"track_number"`
@@ -16,6 +17,7 @@ type Item struct {
 	Status      int32   `json:"status" db:"status"`
 }
 
+// ToDto converts Item model to DTO
 func (item Item) ToDto() dto.ItemDto {
 	return dto.ItemDto{
 		TrackNumber: item.TrackNumber,

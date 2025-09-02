@@ -17,10 +17,12 @@ import (
 	"wb-task-L0/internal/models"
 )
 
+// OrderRepository handles database operations for orders
 type OrderRepository struct {
 	Db *sqlx.DB
 }
 
+// InitConn initializes a new database connection
 func InitConn() *sqlx.DB {
 	db, err := sqlx.Connect("postgres", getDBConnStr())
 	if err != nil {
@@ -29,10 +31,12 @@ func InitConn() *sqlx.DB {
 	return db
 }
 
+// NewOrderRepository creates a new OrderRepository
 func NewOrderRepository(db *sqlx.DB) *OrderRepository {
 	return &OrderRepository{Db: db}
 }
 
+// loadEnv loads environment variables from .env file
 func loadEnv() {
 	_, currFile, _, _ := runtime.Caller(0)
 	currDir := filepath.Dir(currFile)
@@ -42,6 +46,7 @@ func loadEnv() {
 	}
 }
 
+// getDBConnStr returns PostgreSQL connection string
 func getDBConnStr() string {
 	loadEnv()
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
@@ -54,6 +59,7 @@ func getDBConnStr() string {
 	)
 }
 
+// RunMigrations runs database migrations for all necessary tables
 func RunMigrations() {
 	m, err := migrate.New("file://migrations", getDBConnStr())
 	if err != nil {
@@ -64,6 +70,7 @@ func RunMigrations() {
 	}
 }
 
+// GetOrdersIDs returns paginated order IDs matching search
 func (r *OrderRepository) GetOrdersIDs(search string, page int32, size int32) ([]string, int32, error) {
 	query := `
         SELECT 
@@ -95,6 +102,7 @@ func (r *OrderRepository) GetOrdersIDs(search string, page int32, size int32) ([
 	return ids, count, nil
 }
 
+// parsePostgresArr converts Postgres array byte slice to string slice
 func parsePostgresArr(arrayBytes []byte) []string {
 	idsStr := string(arrayBytes)
 	idsStr = strings.Trim(idsStr, "{}")
@@ -106,6 +114,7 @@ func parsePostgresArr(arrayBytes []byte) []string {
 	return ids
 }
 
+// GetOrder retrieves an order (including items) by UID
 func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
 	orderQuery := `
 		SELECT
@@ -169,6 +178,7 @@ func (r *OrderRepository) GetOrder(orderUID string) (models.Order, error) {
 	return order, nil
 }
 
+// SaveOrder inserts a new order with delivery, payment, and items
 func (r *OrderRepository) SaveOrder(order models.Order) error {
 	tx, err := r.Db.Beginx()
 	if err != nil {
@@ -227,6 +237,7 @@ func (r *OrderRepository) SaveOrder(order models.Order) error {
 	return tx.Commit()
 }
 
+// GetLatestOrders retrieves the latest n orders (including their items)
 func (r *OrderRepository) GetLatestOrders(n int) ([]models.Order, error) {
 	query := `
 		SELECT

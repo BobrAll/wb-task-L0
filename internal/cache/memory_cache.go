@@ -5,6 +5,7 @@ import (
 	"wb-task-L0/internal/models"
 )
 
+// memoryCache implements Cache interface using in-memory storage
 type memoryCache struct {
 	mu       sync.RWMutex
 	size     int
@@ -13,14 +14,16 @@ type memoryCache struct {
 	index    int
 }
 
-func New(size int) Cache {
+// New creates a new memoryCache with given size of orders
+func New(maxOrders int) Cache {
 	return &memoryCache{
-		size:     size,
-		keys:     make([]string, 0, size),
+		size:     maxOrders,
+		keys:     make([]string, 0, maxOrders),
 		orderMap: make(map[string]models.Order),
 	}
 }
 
+// Get retrieves an order from cache by ID
 func (c *memoryCache) Get(id string) (models.Order, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -28,6 +31,7 @@ func (c *memoryCache) Get(id string) (models.Order, bool) {
 	return order, ok
 }
 
+// Add stores or updates a single order in cache
 func (c *memoryCache) Add(order models.Order) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -52,6 +56,7 @@ func (c *memoryCache) Add(order models.Order) {
 	c.index = (c.index + 1) % c.size
 }
 
+// AddAll stores or updates multiple orders in cache
 func (c *memoryCache) AddAll(orders []models.Order) {
 	c.mu.Lock()
 	defer c.mu.Unlock()

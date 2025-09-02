@@ -9,11 +9,14 @@ import (
 	"wb-task-L0/internal/models"
 )
 
+// StartOrderListener consumes order messages from Kafka and saves them to DB
 func StartOrderListener() {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"localhost:9092"},
-		Topic:   "orders",
-		GroupID: "orders-group",
+		Brokers:  []string{"localhost:9092"},
+		Topic:    "orders",
+		GroupID:  "orders-group",
+		MinBytes: 10,
+		MaxBytes: 10e6,
 	})
 	defer reader.Close()
 

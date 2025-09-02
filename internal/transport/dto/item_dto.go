@@ -1,5 +1,6 @@
 package dto
 
+// ItemDto represents a product in an order for API responses
 type ItemDto struct {
 	TrackNumber string  `json:"track_number" db:"track_number"`
 	Price       float64 `json:"price" db:"price"`

@@ -6,10 +6,12 @@ import (
 	"wb-task-L0/internal/models"
 )
 
+// makeOrder creates a simple Order with given ID
 func makeOrder(id string) models.Order {
 	return models.Order{OrderID: id}
 }
 
+// TestAddAndGet verifies adding and retrieving single orders in cache
 func TestAddAndGet(t *testing.T) {
 	c := cache.New(2)
 
@@ -25,6 +27,7 @@ func TestAddAndGet(t *testing.T) {
 	}
 }
 
+// TestAddOverwriteExisting checks that adding an existing order updates it
 func TestAddOverwriteExisting(t *testing.T) {
 	c := cache.New(2)
 
@@ -44,6 +47,7 @@ func TestAddOverwriteExisting(t *testing.T) {
 	}
 }
 
+// TestEviction ensures cache evicts oldest items when capacity is exceeded
 func TestEviction(t *testing.T) {
 	c := cache.New(2)
 
@@ -62,6 +66,7 @@ func TestEviction(t *testing.T) {
 	}
 }
 
+// TestAddAll verifies batch adding orders to cache
 func TestAddAll(t *testing.T) {
 	c := cache.New(3)
 
@@ -79,6 +84,7 @@ func TestAddAll(t *testing.T) {
 	}
 }
 
+// TestAddAllEviction ensures batch adding respects cache capacity and evicts old items
 func TestAddAllEviction(t *testing.T) {
 	c := cache.New(2)
 

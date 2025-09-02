@@ -26,6 +26,7 @@ import (
 
 var pgContainer *postgres.PostgresContainer
 
+// RunMigrations applies database migrations for testing
 func RunMigrations(dsn string) {
 	_, filename, _, _ := runtime.Caller(0)
 	testDir := filepath.Dir(filename)
@@ -55,6 +56,7 @@ func RunMigrations(dsn string) {
 	}
 }
 
+// setupPostgres starts a test Postgres container and returns a repository
 func setupPostgres(t *testing.T) *db.OrderRepository {
 	ctx := context.Background()
 
@@ -95,10 +97,12 @@ func setupPostgres(t *testing.T) *db.OrderRepository {
 	return repo
 }
 
+// teardownPostgres stops the test Postgres container
 func teardownPostgres(t *testing.T) {
 	require.NoError(t, pgContainer.Terminate(context.Background()))
 }
 
+// TestOrderRepository_SaveAndGetOrder tests saving and retrieving an order
 func TestOrderRepository_SaveAndGetOrder(t *testing.T) {
 	repo := setupPostgres(t)
 	defer teardownPostgres(t)
@@ -153,6 +157,7 @@ func TestOrderRepository_SaveAndGetOrder(t *testing.T) {
 	require.Len(t, got.Items, 1)
 }
 
+// TestOrderRepository_GetLatestOrders tests retrieving latest orders
 func TestOrderRepository_GetLatestOrders(t *testing.T) {
 	repo := setupPostgres(t)
 	defer teardownPostgres(t)
@@ -205,6 +210,7 @@ func TestOrderRepository_GetLatestOrders(t *testing.T) {
 	require.NotEmpty(t, orders)
 }
 
+// TestOrderRepository_GetOrdersIDs tests retrieving paginated order IDs
 func TestOrderRepository_GetOrdersIDs(t *testing.T) {
 	repo := setupPostgres(t)
 	defer teardownPostgres(t)
