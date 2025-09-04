@@ -5,19 +5,15 @@ import (
 	"encoding/json"
 	"github.com/segmentio/kafka-go"
 	"log"
+	"os"
+	"strconv"
 	"wb-task-L0/internal/db"
 	"wb-task-L0/internal/models"
 )
 
 // StartOrderListener consumes order messages from Kafka and saves them to DB
 func StartOrderListener() {
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{"localhost:9092"},
-		Topic:    "orders",
-		GroupID:  "orders-group",
-		MinBytes: 10,
-		MaxBytes: 10e6,
-	})
+	reader := createKafkaReader()
 	defer reader.Close()
 
 	dbConn := db.InitConn()
@@ -41,4 +37,24 @@ func StartOrderListener() {
 			log.Println("SaveOrder error: %v, data: %s", err, string(msg.Value))
 		}
 	}
+}
+
+// createKafkaReader configures Kafka reader from env vars
+func createKafkaReader() *kafka.Reader {
+	minBytes, err := strconv.Atoi(os.Getenv("KAFKA_MIN_BYTES"))
+	if err != nil {
+		log.Fatal("Error parsing KAFKA_MIN_BYTES", err)
+	}
+	maxBytes, err := strconv.Atoi(os.Getenv("KAFKA_MAX_BYTES"))
+	if err != nil {
+		log.Fatal("Error parsing KAFKA_MAX_BYTES", err)
+	}
+
+	return kafka.NewReader(kafka.ReaderConfig{
+		Brokers:  []string{os.Getenv("KAFKA_ADDR")},
+		Topic:    os.Getenv("KAFKA_ORDERS_TOPIC"),
+		GroupID:  os.Getenv("KAFKA_ORDERS_GROUP_ID"),
+		MinBytes: minBytes,
+		MaxBytes: maxBytes,
+	})
 }

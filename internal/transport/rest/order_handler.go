@@ -57,8 +57,11 @@ func GetOrder(repo *db.OrderRepository, cache cache.Cache) gin.HandlerFunc {
 		var err error
 		order, ok := cache.Get(orderID)
 		if !ok {
+			log.Println("CACHE MISS")
 			order, err = repo.GetOrder(orderID)
 			cache.Add(order)
+		} else {
+			log.Println("CACHE HIT")
 		}
 
 		if err != nil {

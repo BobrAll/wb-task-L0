@@ -7,12 +7,9 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
-	"github.com/joho/godotenv"
 	"github.com/lib/pq"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"wb-task-L0/internal/models"
 )
@@ -36,19 +33,8 @@ func NewOrderRepository(db *sqlx.DB) *OrderRepository {
 	return &OrderRepository{Db: db}
 }
 
-// loadEnv loads environment variables from .env file
-func loadEnv() {
-	_, currFile, _, _ := runtime.Caller(0)
-	currDir := filepath.Dir(currFile)
-	envPath := filepath.Join(currDir, "..", "..", "configs", ".env")
-	if err := godotenv.Load(envPath); err != nil {
-		panic(fmt.Sprintf("Error loading .env file: %v", err))
-	}
-}
-
 // getDBConnStr returns PostgreSQL connection string
 func getDBConnStr() string {
-	loadEnv()
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
