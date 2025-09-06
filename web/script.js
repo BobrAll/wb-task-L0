@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+const API_BASE_URL = '/api/v1';
 const ORDERS_PER_PAGE = 10;
 
 const ordersContainer = document.getElementById('orders-container');
