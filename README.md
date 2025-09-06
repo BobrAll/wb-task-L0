@@ -1,12 +1,13 @@
 # WB Task L0 - Сервис обработки заказов
 
-Микросервис для обработки и отображения данных о заказах с использованием Kafka, PostgreSQL и in-memory кэша.
+Микросервис для обработки и отображения данных о заказах с использованием Kafka, PostgreSQL, Nginx и Redis.
 
 ## Функциональность
 
+- **Балансировка нагрузки** с помощью Nginx
 - **Получение заказов** из Kafka в реальном времени
 - **Сохранение данных** в PostgreSQL с транзакционной безопасностью
-- **In-memory кэширование** для быстрого доступа к данным
+- **Redis-кэширование** для быстрого доступа к данным в распределенной среде
 - **REST API** для получения информации о заказах
 - **Веб-интерфейс** для поиска заказов по ID
 - **Автовосстановление кэша** при перезапуске сервиса
@@ -25,30 +26,22 @@ cd wb-task-L0
 
 # Или вручную:
 docker-compose -f deployments/docker-compose.yaml up -d
-go run cmd/main/main.go
+PORT=8081 go run cmd/server/main.go &
+PORT=8082 go run cmd/server/main.go
 ```
 
 ### Скрипты
 
 В проекте доступны удобные скрипты:
 
-- **`scripts/start_project.sh`** - запуск всего проекта (Docker + приложение)
+- **`scripts/start_project.sh`** - запуск всего проекта (Docker + микросервис в нескольких экземплярах)
 - **`scripts/run_tests.sh`** - запуск всех тестов (unit + integration)
 - **`scripts/kafka-producer.sh`** - скрипт для отправки тестовых заказов в Kafka
 
 ## Конфигурация
 
-Сервис настраивается через переменные окружения в `configs/.env`:
-
-```env
-POSTGRES_DB: wb-db
-POSTGRES_USER: wb-user
-POSTGRES_PASSWORD: wb-password
-POSTGRES_PORT: 5432
-POSTGRES_HOST: localhost
-POSTGRES_SSL_MODE: disable
-```
-Из этого файла конфиг подтягивается как в приложение, так и в докер.
+Сервис настраивается через переменные окружения в `./configs/.env`.  
+Из этого файла конфиг подтягивается как в приложение, так и в докер. Пример есть в .env-example
 
 ## API Endpoints
 
